@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Savannah Vehicle Exchange</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{font-family:'Manrope',-apple-system,BlinkMacSystemFont,sans-serif;background:#f6f1e8;color:#1a2b4a;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    ::-webkit-scrollbar{width:8px;height:8px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:rgba(157,34,53,0.35);border-radius:4px}
+    ::-webkit-scrollbar-thumb:hover{background:rgba(157,34,53,0.55)}
+    /* Reset native control look */
+    input,select,textarea,button{font-family:inherit;color:inherit}
+    select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%231a2b4a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 14px center;background-size:10px;padding-right:36px}
+    /* Selection */
+    ::selection{background:rgba(157,34,53,0.18);color:#1a2b4a}
+    /* Subtle focus rings */
+    input:focus,select:focus,textarea:focus{border-color:#9d2235!important;box-shadow:0 0 0 3px rgba(157,34,53,0.12)!important}
+    a{color:inherit;text-decoration:none}
+    button{cursor:pointer}
+    /* SVE keyframes */
+    @keyframes sve-rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .sve-rise{animation:sve-rise .35s ease-out}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+// Pure JS — no Babel needed
+const VTYPES=['Sedan','SUV / Crossover','Pickup Truck','Coupe','Convertible','Minivan','Van','Motorcycle','Classic / Antique','Electric Vehicle','Hybrid','Sports Car','Wagon','Hatchback','Off-Road / 4x4','RV / Motorhome','ATV / UTV','Other'];
+const YLIST=Array.from({length:new Date().getFullYear()-1899},(_,i)=>String(new Date().getFullYear()-i));
+const MM={'Acura':['ILX','MDX','NSX','RDX','TLX','Other'],'Alfa Romeo':['Giulia','Stelvio','Other'],'Aston Martin':['DB11','DBX','Vantage','Other'],'Audi':['A3','A4','A5','A6','Q3','Q5','Q7','Q8','R8','RS3','RS5','TT','Other'],'BMW':['3 Series','4 Series','5 Series','7 Series','i4','iX','M3','M4','M5','X3','X5','X6','Z4','Other'],'Bentley':['Bentayga','Continental GT','Flying Spur','Other'],'Buick':['Enclave','Encore','LaCrosse','Other'],'Cadillac':['CT4','CT5','Escalade','Lyriq','XT4','XT5','XT6','Other'],'Chevrolet':['Blazer','Bolt EV','Camaro','Colorado','Corvette','Equinox','Malibu','Silverado 1500','Silverado 2500HD','Suburban','Tahoe','Traverse','Other'],'Chrysler':['300','Pacifica','Voyager','Other'],'Dodge':['Challenger','Charger','Durango','Grand Caravan','Viper','Other'],'Ducati':['Monster','Panigale V4','Scrambler','Other'],'Ferrari':['488 GTB','812 Superfast','F8 Tributo','Roma','SF90','Other'],'Ford':['Bronco','Edge','Escape','Expedition','Explorer','F-150','F-250','F-350','Maverick','Mustang','Mustang Mach-E','Ranger','Transit','Other'],'GMC':['Acadia','Canyon','Sierra 1500','Sierra 2500HD','Terrain','Yukon','Yukon XL','Other'],'Genesis':['G70','G80','G90','GV70','GV80','Other'],'Harley-Davidson':['Fat Boy','Iron 883','Road Glide','Road King','Softail','Sportster','Street Glide','Other'],'Honda':['Accord','Civic','CR-V','Fit','HR-V','Odyssey','Passport','Pilot','Ridgeline','Other'],'Honda Motorcycle':['Africa Twin','CBR600RR','CBR1000RR','Gold Wing','Grom','CMX Rebel','Other'],'Hyundai':['Elantra','IONIQ 5','IONIQ 6','Kona','Palisade','Santa Cruz','Santa Fe','Sonata','Tucson','Other'],'Indian':['Challenger','Chief','Scout','Springfield','Other'],'Infiniti':['Q50','Q60','QX50','QX60','QX80','Other'],'Jaguar':['F-Pace','F-Type','XE','XF','Other'],'Jeep':['Cherokee','Compass','Gladiator','Grand Cherokee','Wrangler','Other'],'Kawasaki':['Ninja 400','Ninja 650','Ninja ZX-6R','Ninja ZX-10R','Z900','Other'],'Kia':['EV6','Forte','K5','Seltos','Sorento','Soul','Sportage','Stinger','Telluride','Other'],'KTM':['390 Duke','890 Adventure','1290 Super Duke R','Other'],'Lamborghini':['Huracan','Urus','Other'],'Land Rover':['Defender','Discovery','Range Rover','Range Rover Sport','Other'],'Lexus':['ES','GX','IS','LC','LS','LX','NX','RX','UX','Other'],'Lincoln':['Aviator','Corsair','Nautilus','Navigator','Other'],'Lotus':['Emira','Evora','Other'],'Maserati':['Ghibli','GranTurismo','Levante','MC20','Other'],'Mazda':['CX-5','CX-9','Mazda3','Mazda6','MX-5 Miata','RX-7','RX-8','Other'],'McLaren':['570S','720S','Artura','Other'],'Mercedes-Benz':['C-Class','E-Class','G-Class','GLE','GLS','S-Class','AMG GT','Other'],'Mercury':['Grand Marquis','Mountaineer','Sable','Other'],'Mini':['Clubman','Countryman','Hardtop','Other'],'Mitsubishi':['Eclipse Cross','Lancer','Outlander','Other'],'Nissan':['350Z','370Z','Altima','Frontier','GT-R','Maxima','Murano','Rogue','Titan','Z','Other'],'Oldsmobile':['Alero','Cutlass','Delta 88','Other'],'Plymouth':['Barracuda','GTX','Road Runner','Other'],'Pontiac':['Firebird','GTO','Grand Prix','Trans Am','Other'],'Porsche':['718 Boxster','911','Cayenne','Macan','Panamera','Taycan','Other'],'RAM':['1500','2500','3500','ProMaster','Other'],'Rolls-Royce':['Cullinan','Ghost','Phantom','Wraith','Other'],'Saab':['9-3','9-5','Other'],'Saturn':['Aura','Ion','Sky','Vue','Other'],'Subaru':['BRZ','Crosstrek','Forester','Impreza','Outback','WRX','Other'],'Suzuki':['Grand Vitara','Kizashi','SX4','Other'],'Suzuki Motorcycle':['Hayabusa','GSX-R600','SV650','V-Strom 650','Other'],'Tesla':['Cybertruck','Model 3','Model S','Model X','Model Y','Other'],'Toyota':['4Runner','Camry','Corolla','FJ Cruiser','GR Supra','Highlander','Land Cruiser','Prius','RAV4','Sequoia','Sienna','Tacoma','Tundra','Venza','Other'],'Triumph':['Bonneville T100','Rocket 3','Speed Triple','Tiger 900','Other'],'Volkswagen':['Atlas','Golf GTI','Golf R','ID.4','Jetta','Passat','Tiguan','Other'],'Volvo':['S60','S90','V60','XC40','XC60','XC90','Other'],'Yamaha Motorcycle':['MT-07','MT-09','R1','R6','Tenere 700','Other'],'Other':['Other']};
+const ALL_MAKES=['-- Select Make --',...Object.keys(MM).filter(k=>k!=='Other').sort(),'Other'];
+
+function printSticker(v,getStatus,fmt$,fmtMi,fmtD){
+  const st=getStatus(v);
+  const chk=ok=>'<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border:2px solid #9d2235;border-radius:2px;background:'+(ok?'#9d2235':'#fff')+';color:#fff;font-size:11px">'+(ok?'&#10003;':'')+'</span>';
+  const row=(l,v2)=>'<div style="background:#f8f6f0;padding:8px 12px;border-radius:3px"><div style="font-size:8px;color:#999;text-transform:uppercase;letter-spacing:1px">'+l+'</div><div style="font-size:13px;font-weight:700;color:#1a2b4a;margin-top:2px">'+v2+'</div></div>';
+  const w=window.open('','_blank','width=820,height=1050');
+  const stColor=st.l==='ACTIVE'?'#2d8a4e':st.l==='SOLD'?'#c9a557':'#888';
+  let h='<!DOCTYPE html><html><head><title>SVE '+v.regNumber+'</title>';
+  h+='<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">';
+  h+='<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Manrope,sans-serif}@media print{.np{display:none!important}body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body>';
+  h+='<div style="background:linear-gradient(135deg,#9d2235,#7a1a2a);padding:18px 26px;display:flex;justify-content:space-between;align-items:center">';
+  h+='<div><div style="font-family:Bebas Neue,sans-serif;color:#fff;font-size:30px;letter-spacing:3px">SAVANNAH</div>';
+  h+='<div style="font-family:Bebas Neue,sans-serif;color:rgba(255,255,255,.75);font-size:20px;letter-spacing:3px">VEHICLE EXCHANGE</div>';
+  h+='<div style="font-size:8px;color:rgba(255,255,255,.5);letter-spacing:2px;margin-top:4px">SAVANNAHVEHICLEEXCHANGE.COM</div></div>';
+  h+='<div style="text-align:right"><div style="font-size:8px;color:rgba(255,255,255,.6);letter-spacing:2px;text-transform:uppercase;margin-bottom:3px">Registration Number</div>';
+  h+='<div style="font-family:Bebas Neue,sans-serif;font-size:22px;color:#fff;letter-spacing:3px">'+v.regNumber+'</div>';
+  h+='<div style="margin-top:4px;font-size:9px;font-weight:700;color:'+stColor+';background:rgba(255,255,255,.15);padding:3px 10px;border-radius:10px;display:inline-block">'+st.l+'</div></div></div>';
+  h+='<div style="background:linear-gradient(135deg,#1a2b4a,#0d1829);padding:14px 26px;display:flex;justify-content:space-between;align-items:center">';
+  h+='<span style="font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:1px">Asking Price</span>';
+  h+='<span style="font-family:Bebas Neue,sans-serif;font-size:34px;color:#c9a84c;letter-spacing:2px">'+fmt$(v.price)+'</span></div>';
+  h+='<div style="padding:16px 26px">';
+  h+='<div style="font-size:9px;font-weight:700;color:#9d2235;text-transform:uppercase;letter-spacing:2px;border-left:3px solid #9d2235;padding-left:6px;margin-bottom:8px">Vehicle Information</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">';
+  h+=row('Year',v.year||'--')+row('Make',v.make||'--')+row('Model',v.model||'--')+row('Trim',v.trim||'--');
+  h+=row('Type',v.vehicleType||'--')+row('Mileage',fmtMi(v.miles))+row('VIN / Serial',v.vin||'--')+row('Reg Type',v.registrationType==='multi'?'Show Until It Sells':'Single Weekend')+'</div>';
+  if(v.description){h+='<div style="font-size:9px;font-weight:700;color:#9d2235;text-transform:uppercase;letter-spacing:2px;border-left:3px solid #9d2235;padding-left:6px;margin-bottom:8px">Description</div><div style="background:#f8f6f0;padding:12px;border-left:3px solid #9d2235;font-size:12px;line-height:1.6;margin-bottom:12px">'+v.description+'</div>'}
+  h+='<div style="font-size:9px;font-weight:700;color:#9d2235;text-transform:uppercase;letter-spacing:2px;border-left:3px solid #9d2235;padding-left:6px;margin-bottom:8px">Access &amp; Contact Permissions</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px">';
+  h+='<div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f8f6f0;border-radius:4px;font-size:12px;font-weight:600">'+chk(v.openDoors)+' Doors May Be Opened</div>';
+  h+='<div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f8f6f0;border-radius:4px;font-size:12px;font-weight:600">'+chk(v.openHood)+' Hood May Be Opened</div>';
+  h+='<div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f8f6f0;border-radius:4px;font-size:12px;font-weight:600">'+chk(v.okayToCall)+' Okay to Call</div>';
+  h+='<div style="display:flex;align-items:center;gap:8px;padding:9px 12px;background:#f8f6f0;border-radius:4px;font-size:12px;font-weight:600">'+chk(v.okayToText)+' Okay to Text</div></div>';
+  h+='<div style="font-size:9px;font-weight:700;color:#9d2235;text-transform:uppercase;letter-spacing:2px;border-left:3px solid #9d2235;padding-left:6px;margin-bottom:8px">Owner Contact</div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px">'+row('Name',v.contactName||'--')+row('Phone',v.contactPhone||'--')+row('Email',v.contactEmail||'--')+'</div>';
+  h+='<div style="background:#f0f0f0;border:2px solid #9d2235;border-radius:4px;padding:8px 14px;display:flex;justify-content:space-between">';
+  h+='<div><div style="font-size:8px;color:#9d2235;text-transform:uppercase;letter-spacing:1px;font-weight:700">Registered</div><div style="font-family:Bebas Neue,sans-serif;font-size:14px;color:#555">'+fmtD(v.registrationDate)+'</div></div>';
+  h+='<div style="text-align:center"><div style="font-size:8px;color:#9d2235;text-transform:uppercase;letter-spacing:1px;font-weight:700">Week</div><div style="font-family:Bebas Neue,sans-serif;font-size:18px;color:#1a2b4a">'+v.weekNumber+'</div></div>';
+  h+='<div style="text-align:right"><div style="font-size:8px;color:#9d2235;text-transform:uppercase;letter-spacing:1px;font-weight:700">Expires</div><div style="font-family:Bebas Neue,sans-serif;font-size:14px;color:#1a2b4a">'+fmtD(v.expirationDate)+'</div></div></div></div>';
+  h+='<div style="background:#1a2b4a;padding:10px 26px;display:flex;justify-content:space-between;align-items:center">';
+  h+='<div style="font-family:Bebas Neue,sans-serif;color:#fff;font-size:13px;letter-spacing:2px">SAVANNAH VEHICLE EXCHANGE &bull; 5717 White Bluff Rd, Savannah GA 31405</div>';
+  h+='<div style="font-size:9px;color:rgba(255,255,255,.4)">Reg: '+v.regNumber+'</div></div>';
+  h+='<div class="np" style="text-align:center;padding:18px;background:#f5f5f5;border-top:1px solid #ddd">';
+  h+='<button onclick="window.print()" style="background:linear-gradient(135deg,#9d2235,#7a1a2a);color:#fff;border:none;padding:12px 32px;font-size:13px;font-weight:700;border-radius:5px;cursor:pointer;margin-right:10px">Print Window Sticker</button>';
+  h+='<button onclick="window.close()" style="background:transparent;color:#9d2235;border:2px solid #9d2235;padding:10px 22px;font-size:12px;font-weight:700;border-radius:5px;cursor:pointer">Close</button></div>';
+  h+='</body></html>';
+  w.document.write(h);w.document.close();
+}
+</script>
+<script type="text/babel">
+
+const { useState, useEffect, useMemo } = React;
+
+// SVE brand palette — refined
+const CR = '#9d2235';          // brand crimson
+const CR_DARK = '#7a1a2a';     // crimson press
+const NV = '#1a2b4a';          // brand navy (ink)
+const NV_DEEP = '#0d1829';     // dashboard floor
+const GOLD = '#c9a557';        // accent gold
+const CANVAS = '#f6f1e8';      // warm-paper canvas
+const CANVAS_SOFT = '#fbf7f0'; // subtle band
+const PAPER = '#ffffff';       // card surface
+const HAIRLINE = '#e8e1d4';    // 1px border tone
+const HAIRLINE_SOFT = '#efe8da';
+const INK = '#1a2b4a';         // headlines, primary text (use navy as ink)
+const BODY = '#5a6478';        // running text
+const MUTED = '#8b8f9a';       // labels, breadcrumbs
+const MUTED_SOFT = '#b5b8c0';  // captions
+const WH = '#ffffff';
+const SUCCESS = '#2d8a4e';
+const WARN = '#c9a557';
+const ERROR = '#c0392b';
+
+const FONT_DISPLAY = "'Bebas Neue',sans-serif";
+const FONT_SERIF = "'DM Serif Display',Georgia,serif";
+const FONT_BODY = "'Manrope',-apple-system,BlinkMacSystemFont,sans-serif";
+const FONT_MONO = "'JetBrains Mono',ui-monospace,monospace";
+
+const USERS = { admin: 'sve2026', manager: 'autoshow2026', supervisor: 'registration2026' };
+
+const SEED = [
+  {id:1,regNumber:'SVX-M5K3J1-A2B3',vehicleType:'Sedan',year:'2019',make:'Toyota',model:'Camry',vin:'4T1B11HK1KU234567',trim:'XSE V6',miles:42000,price:18500,registrationType:'single',contactName:'Marcus Williams',contactPhone:'912-555-0101',contactEmail:'marcus.w@email.com',openDoors:true,openHood:false,okayToCall:true,okayToText:true,description:'One owner, full service history. Sunroof, heated seats.',registrationDate:'2026-04-10T09:00:00',expirationDate:'2026-04-18T23:59:59',weekNumber:15,status:'expired'},
+  {id:2,regNumber:'SVX-N6L4K2-C3D4',vehicleType:'SUV',year:'2021',make:'Ford',model:'Explorer',vin:'1FMSK8DH4MGB12345',trim:'XLT',miles:28000,price:32000,registrationType:'multi',contactName:'Jennifer Chen',contactPhone:'912-555-0102',contactEmail:'j.chen@email.com',openDoors:true,openHood:true,okayToCall:false,okayToText:true,description:'3rd row seating, tow package, AWD.',registrationDate:'2026-04-10T10:30:00',expirationDate:'2026-07-09T23:59:59',weekNumber:15,status:'active'},
+  {id:3,regNumber:'SVX-O7M5L3-E5F6',vehicleType:'Truck',year:'2020',make:'RAM',model:'1500',vin:'1C6SRFFT5LN123456',trim:'Big Horn',miles:55000,price:29500,registrationType:'single',contactName:'David Rodriguez',contactPhone:'912-555-0103',contactEmail:'d.rod@email.com',openDoors:true,openHood:true,okayToCall:true,okayToText:false,description:'Crew cab, 4x4, bedliner, trailer brake.',registrationDate:'2026-04-17T08:00:00',expirationDate:'2026-04-25T23:59:59',weekNumber:16,status:'sold'},
+  {id:4,regNumber:'SVX-P8N6M4-G7H8',vehicleType:'Coupe',year:'2018',make:'Dodge',model:'Challenger',vin:'2C3CDZFJ6JH234567',trim:'R/T 392',miles:38000,price:27000,registrationType:'single',contactName:'Ashley Thompson',contactPhone:'912-555-0104',contactEmail:'a.thompson@email.com',openDoors:false,openHood:true,okayToCall:true,okayToText:true,description:'392 HEMI, manual 6-speed, widebody kit.',registrationDate:'2026-04-17T11:00:00',expirationDate:'2026-04-25T23:59:59',weekNumber:16,status:'expired'},
+  {id:5,regNumber:'SVX-Q9O7N5-I9J0',vehicleType:'Classic',year:'1969',make:'Chevrolet',model:'Camaro',vin:'124379N512345',trim:'SS',miles:78000,price:52000,registrationType:'multi',contactName:'Robert Mason',contactPhone:'912-555-0105',contactEmail:'r.mason@email.com',openDoors:true,openHood:true,okayToCall:true,okayToText:false,description:'Numbers matching 350ci, show-quality paint.',registrationDate:'2026-04-17T09:30:00',expirationDate:'2026-07-16T23:59:59',weekNumber:16,status:'active'},
+  {id:6,regNumber:'SVX-R0P8O6-K1L2',vehicleType:'Motorcycle',year:'2022',make:'Harley-Davidson',model:'Road Glide',vin:'1HD1KRM10NB123456',trim:'Special',miles:8500,price:21000,registrationType:'single',contactName:'Tommy Garcia',contactPhone:'912-555-0106',contactEmail:'t.garcia@email.com',openDoors:false,openHood:false,okayToCall:true,okayToText:true,description:'Custom exhaust, upgraded audio.',registrationDate:'2026-04-24T09:00:00',expirationDate:'2026-05-02T23:59:59',weekNumber:17,status:'active'},
+  {id:7,regNumber:'SVX-S1Q9P7-M3N4',vehicleType:'Convertible',year:'2020',make:'Ford',model:'Mustang GT',vin:'1FATP8UH5L5100123',trim:'Premium',miles:22000,price:34500,registrationType:'single',contactName:'Samantha Lee',contactPhone:'912-555-0107',contactEmail:'s.lee@email.com',openDoors:true,openHood:true,okayToCall:false,okayToText:true,description:'5.0 Coyote V8, 6-speed manual.',registrationDate:'2026-04-24T10:00:00',expirationDate:'2026-05-02T23:59:59',weekNumber:17,status:'active'},
+  {id:8,regNumber:'SVX-T2R0Q8-O5P6',vehicleType:'SUV',year:'2023',make:'Toyota',model:'4Runner',vin:'JTEBU5JR8P5123456',trim:'TRD Pro',miles:12000,price:48000,registrationType:'multi',contactName:'Kevin Johnson',contactPhone:'912-555-0108',contactEmail:'k.johnson@email.com',openDoors:true,openHood:false,okayToCall:true,okayToText:true,description:'TRD suspension, Bilstein shocks.',registrationDate:'2026-04-24T13:00:00',expirationDate:'2026-07-23T23:59:59',weekNumber:17,status:'active'},
+  {id:9,regNumber:'SVX-U3S1R9-Q7R8',vehicleType:'Sedan',year:'2022',make:'BMW',model:'330i',vin:'WBA5R7C01NFH12345',trim:'M Sport',miles:18000,price:37000,registrationType:'single',contactName:'Nicole Patel',contactPhone:'912-555-0109',contactEmail:'n.patel@email.com',openDoors:true,openHood:false,okayToCall:true,okayToText:false,description:'M Sport package, premium audio, HUD.',registrationDate:'2026-04-24T14:30:00',expirationDate:'2026-05-02T23:59:59',weekNumber:17,status:'active'},
+  {id:10,regNumber:'SVX-V4T2S0-S9T0',vehicleType:'Truck',year:'2021',make:'Chevrolet',model:'Silverado 1500',vin:'1GCUDDED9MZ123456',trim:'LTZ',miles:35000,price:38000,registrationType:'single',contactName:'Bryan Foster',contactPhone:'912-555-0110',contactEmail:'b.foster@email.com',openDoors:true,openHood:true,okayToCall:true,okayToText:true,description:'Crew cab, Duramax diesel.',registrationDate:'2026-05-01T09:00:00',expirationDate:'2026-05-09T23:59:59',weekNumber:18,status:'active'},
+  {id:11,regNumber:'SVX-W5U3T1-U1V2',vehicleType:'Coupe',year:'2017',make:'Ford',model:'Mustang',vin:'1FA6P8CF0H5123456',trim:'Shelby GT350',miles:29000,price:55000,registrationType:'multi',contactName:'Courtney Davis',contactPhone:'912-555-0111',contactEmail:'c.davis@email.com',openDoors:true,openHood:true,okayToCall:false,okayToText:true,description:'Voodoo engine, track package.',registrationDate:'2026-05-01T10:00:00',expirationDate:'2026-07-30T23:59:59',weekNumber:18,status:'active'},
+  {id:12,regNumber:'SVX-X6V4U2-W3X4',vehicleType:'Classic',year:'1957',make:'Chevrolet',model:'Bel Air',vin:'VC57F123456',trim:'Sport Coupe',miles:48000,price:85000,registrationType:'multi',contactName:'Harold Simpson',contactPhone:'912-555-0112',contactEmail:'h.simpson@email.com',openDoors:false,openHood:true,okayToCall:true,okayToText:false,description:'Original 283ci V8, award-winning show car.',registrationDate:'2026-05-01T11:00:00',expirationDate:'2026-07-30T23:59:59',weekNumber:18,status:'active'},
+  {id:13,regNumber:'SVX-Y7W5V3-Y5Z6',vehicleType:'SUV',year:'2022',make:'Jeep',model:'Grand Cherokee',vin:'1C4RJHBG6NC123456',trim:'Overland',miles:22000,price:42000,registrationType:'single',contactName:'Michelle Wright',contactPhone:'912-555-0113',contactEmail:'m.wright@email.com',openDoors:true,openHood:false,okayToCall:true,okayToText:true,description:'Air suspension, panoramic sunroof.',registrationDate:'2026-05-01T12:00:00',expirationDate:'2026-05-09T23:59:59',weekNumber:18,status:'active'},
+  {id:14,regNumber:'SVX-Z8X6W4-A7B8',vehicleType:'Motorcycle',year:'2021',make:'Kawasaki',model:'Ninja 650',vin:'JKAEX8A19MB123456',trim:'ABS',miles:6200,price:7500,registrationType:'single',contactName:'Carlos Ruiz',contactPhone:'912-555-0114',contactEmail:'c.ruiz@email.com',openDoors:false,openHood:false,okayToCall:true,okayToText:true,description:'ABS, slip-assist clutch, LED lighting.',registrationDate:'2026-05-01T14:00:00',expirationDate:'2026-05-09T23:59:59',weekNumber:18,status:'active'},
+  {id:15,regNumber:'SVX-A9Y7X5-C9D0',vehicleType:'Minivan',year:'2020',make:'Honda',model:'Odyssey',vin:'5FNRL6H71LB123456',trim:'Elite',miles:41000,price:28000,registrationType:'single',contactName:'Patricia Young',contactPhone:'912-555-0115',contactEmail:'p.young@email.com',openDoors:true,openHood:false,okayToCall:false,okayToText:true,description:'CabinWatch, rear entertainment system.',registrationDate:'2026-05-01T15:00:00',expirationDate:'2026-05-09T23:59:59',weekNumber:18,status:'active'},
+  {id:16,regNumber:'SVX-B0Z8Y6-E1F2',vehicleType:'Convertible',year:'2019',make:'Mazda',model:'MX-5 Miata',vin:'JM1NDAD72K0123456',trim:'Club',miles:31000,price:22000,registrationType:'single',contactName:'Derek Hall',contactPhone:'912-555-0116',contactEmail:'d.hall@email.com',openDoors:true,openHood:false,okayToCall:true,okayToText:true,description:'Manual trans, limited slip diff.',registrationDate:'2026-05-08T09:00:00',expirationDate:'2026-05-16T23:59:59',weekNumber:19,status:'active'},
+  {id:17,regNumber:'SVX-C1A9Z7-G3H4',vehicleType:'Sedan',year:'2023',make:'Honda',model:'Accord',vin:'1HGCY2F53PA123456',trim:'Sport Hybrid',miles:8000,price:27500,registrationType:'single',contactName:'Tiffany Brooks',contactPhone:'912-555-0117',contactEmail:'t.brooks@email.com',openDoors:true,openHood:false,okayToCall:true,okayToText:true,description:'Sport hybrid, 12" touchscreen, Honda Sensing.',registrationDate:'2026-05-08T10:00:00',expirationDate:'2026-05-16T23:59:59',weekNumber:19,status:'active'},
+  {id:18,regNumber:'SVX-D2B0A8-I5J6',vehicleType:'Truck',year:'2022',make:'Ford',model:'F-150 Raptor',vin:'1FTFW1ED6NFA12345',trim:'Raptor R',miles:15000,price:68000,registrationType:'multi',contactName:'James Carter',contactPhone:'912-555-0118',contactEmail:'j.carter@email.com',openDoors:true,openHood:true,okayToCall:true,okayToText:false,description:'Fox shocks, 37" tires, 802A package.',registrationDate:'2026-05-08T11:00:00',expirationDate:'2026-08-06T23:59:59',weekNumber:19,status:'active'},
+  {id:19,regNumber:'SVX-E3C1B9-K7L8',vehicleType:'SUV',year:'2020',make:'GMC',model:'Yukon Denali',vin:'1GKS2HKJ0LR123456',trim:'Denali Ultimate',miles:48000,price:44000,registrationType:'single',contactName:'Sandra Mitchell',contactPhone:'912-555-0119',contactEmail:'s.mitchell@email.com',openDoors:true,openHood:false,okayToCall:false,okayToText:true,description:'Magnetic Ride Control, 22" chrome wheels.',registrationDate:'2026-05-08T13:00:00',expirationDate:'2026-05-16T23:59:59',weekNumber:19,status:'active'},
+  {id:20,regNumber:'SVX-F4D2C0-M9N0',vehicleType:'Classic',year:'1970',make:'Dodge',model:'Challenger',vin:'JS23L0B123456',trim:'R/T 440 Six Pk',miles:62000,price:72000,registrationType:'multi',contactName:'Walter Evans',contactPhone:'912-555-0120',contactEmail:'w.evans@email.com',openDoors:false,openHood:true,okayToCall:true,okayToText:false,description:'Numbers matching 440 Six Pack restoration.',registrationDate:'2026-05-08T14:00:00',expirationDate:'2026-08-06T23:59:59',weekNumber:19,status:'active'},
+];
+
+const fmt$ = n => n ? '$'+Number(n).toLocaleString() : 'N/A';
+const fmtD = d => d ? new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+const fmtMi = m => m ? Number(m).toLocaleString()+' mi' : '—';
+const genReg = () => `SVX-${Date.now().toString(36).toUpperCase().slice(-6)}-${Math.random().toString(36).substr(2,4).toUpperCase()}`;
+const getWk = d => { const dt=new Date(d),fd=new Date(dt.getFullYear(),0,1); return Math.ceil(((dt-fd)/864e5+fd.getDay()+1)/7); };
+const getStatus = v => {
+  if(v.status==='sold') return {l:'SOLD',c:'#c9a557'};
+  if(v.status==='expired'||new Date(v.expirationDate)<new Date()) return {l:'EXPIRED',c:'#888'};
+  return {l:'ACTIVE',c:'#2d8a4e'};
+};
+const csvExport = rows => {
+  const h=['Reg#','Type','Year','Make','Model','Miles','Price','Reg Type','Contact','Phone','Email','Status','Week','Reg Date'];
+  const d=rows.map(v=>[v.regNumber,v.vehicleType,v.year,v.make,v.model,v.miles,v.price,v.registrationType==='multi'?'90-Day':'Single',v.contactName,v.contactPhone,v.contactEmail,getStatus(v).l,'Wk '+v.weekNumber,fmtD(v.registrationDate)]);
+  const csv=[h,...d].map(r=>r.map(c=>'"'+(c??'')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='SVE_Manifest.csv';a.click();
+};
+
+const s = {
+  // -------- Header --------
+  header:{background:CANVAS,borderBottom:'1px solid '+HAIRLINE,position:'sticky',top:0,zIndex:1000,backdropFilter:'saturate(180%) blur(8px)',WebkitBackdropFilter:'saturate(180%) blur(8px)',background:'rgba(246,241,232,0.85)'},
+  headerInner:{maxWidth:'1280px',margin:'0 auto',padding:'0 28px',height:68,display:'flex',justifyContent:'space-between',alignItems:'center',gap:24},
+  logo:{display:'flex',alignItems:'center',gap:10,cursor:'pointer',userSelect:'none'},
+  logoMark:{width:28,height:28,borderRadius:6,background:CR,display:'flex',alignItems:'center',justifyContent:'center',color:WH,fontFamily:FONT_DISPLAY,fontSize:16,letterSpacing:1,flexShrink:0},
+  logoText:{fontFamily:FONT_DISPLAY,fontSize:22,letterSpacing:'2px',lineHeight:1,color:NV},
+  logoSub:{fontSize:9,letterSpacing:'1.5px',color:MUTED,textTransform:'uppercase',marginTop:2,fontWeight:600},
+  nav:{display:'flex',gap:4,alignItems:'center',flexWrap:'wrap'},
+  navBtn:{padding:'9px 14px',background:'transparent',border:'none',color:NV,fontSize:13,fontWeight:600,borderRadius:8,fontFamily:FONT_BODY,transition:'background 120ms'},
+  navBtnActive:{padding:'9px 14px',background:'rgba(157,34,53,0.08)',border:'none',color:CR,fontSize:13,fontWeight:700,borderRadius:8,fontFamily:FONT_BODY},
+  loginBtn:{padding:'9px 16px',background:CR,border:'none',color:WH,fontSize:13,fontWeight:700,borderRadius:8,fontFamily:FONT_BODY,letterSpacing:'0.2px'},
+  adminBtn:{padding:'9px 14px',background:'transparent',border:'1px solid '+HAIRLINE,color:NV,fontSize:13,fontWeight:600,borderRadius:8,fontFamily:FONT_BODY,display:'inline-flex',alignItems:'center',gap:6},
+
+  // -------- Hero & sections --------
+  hero:{background:'linear-gradient(150deg,'+NV+' 0%,#2a3a5e 60%,'+NV+' 100%)',padding:'88px 28px 96px',textAlign:'left',position:'relative',overflow:'hidden'},
+  heroInner:{maxWidth:1280,margin:'0 auto',position:'relative',display:'grid',gridTemplateColumns:'1.2fr 1fr',gap:48,alignItems:'center'},
+  heroEyebrow:{display:'inline-flex',alignItems:'center',gap:8,padding:'6px 14px',background:'rgba(201,165,87,0.14)',border:'1px solid rgba(201,165,87,0.35)',borderRadius:9999,color:GOLD,fontSize:11,fontWeight:700,letterSpacing:'2px',textTransform:'uppercase'},
+  heroTitle:{fontFamily:FONT_DISPLAY,fontSize:'clamp(54px,7.5vw,88px)',letterSpacing:'3px',lineHeight:1,marginTop:24,marginBottom:20,color:WH},
+  heroSub:{fontSize:17,color:'rgba(255,255,255,0.78)',fontFamily:FONT_BODY,fontWeight:400,maxWidth:520,lineHeight:1.55,marginBottom:36},
+
+  // -------- Section primitives --------
+  section:{maxWidth:1180,margin:'0 auto',padding:'72px 28px'},
+  sectionHead:{maxWidth:680,marginBottom:40},
+  sectionEyebrow:{fontSize:11,letterSpacing:'2px',fontWeight:700,color:CR,textTransform:'uppercase',marginBottom:10},
+  sectionH:{fontFamily:FONT_SERIF,fontSize:'clamp(32px,4vw,42px)',color:NV,lineHeight:1.1,letterSpacing:'-0.5px',fontWeight:400},
+  pageTitle:{fontFamily:FONT_SERIF,fontSize:'clamp(40px,5vw,56px)',color:NV,lineHeight:1.05,letterSpacing:'-1px',fontWeight:400,marginBottom:14},
+  pageLead:{fontSize:17,color:BODY,lineHeight:1.55,maxWidth:640},
+
+  // -------- Cards & containers --------
+  card:{background:PAPER,borderRadius:14,padding:28,border:'1px solid '+HAIRLINE},
+  cardSoft:{background:CANVAS_SOFT,borderRadius:14,padding:28,border:'1px solid '+HAIRLINE_SOFT},
+  cardDark:{background:NV_DEEP,borderRadius:14,padding:28,color:WH,border:'1px solid rgba(255,255,255,0.06)'},
+
+  // -------- Buttons --------
+  btn:{padding:'12px 22px',background:CR,color:WH,border:'none',borderRadius:10,fontSize:14,fontWeight:700,fontFamily:FONT_BODY,letterSpacing:'0.2px',display:'inline-flex',alignItems:'center',justifyContent:'center',gap:8,transition:'background 120ms'},
+  btnLg:{padding:'15px 28px',fontSize:15,borderRadius:12},
+  btnOut:{padding:'12px 22px',background:'transparent',color:NV,border:'1px solid '+HAIRLINE,borderRadius:10,fontSize:14,fontWeight:600,fontFamily:FONT_BODY},
+  btnGhost:{padding:'10px 16px',background:'transparent',color:NV,border:'none',borderRadius:8,fontSize:13,fontWeight:600,fontFamily:FONT_BODY},
+  btnDark:{padding:'12px 22px',background:NV,color:WH,border:'none',borderRadius:10,fontSize:14,fontWeight:700,fontFamily:FONT_BODY},
+  iconBtn:{width:36,height:36,borderRadius:8,background:PAPER,border:'1px solid '+HAIRLINE,display:'inline-flex',alignItems:'center',justifyContent:'center',color:NV},
+
+  // -------- Forms --------
+  input:{width:'100%',padding:'12px 14px',border:'1px solid '+HAIRLINE,borderRadius:10,fontSize:14,color:INK,background:PAPER,outline:'none',fontFamily:FONT_BODY,fontWeight:500,transition:'border-color 120ms,box-shadow 120ms'},
+  label:{display:'block',fontSize:12,color:NV,fontWeight:600,marginBottom:6,fontFamily:FONT_BODY,letterSpacing:'0.1px'},
+  labelMeta:{display:'block',fontSize:11,color:MUTED,fontWeight:500,marginTop:6,fontFamily:FONT_BODY},
+
+  // -------- Stats / pills --------
+  badge:{display:'inline-flex',alignItems:'center',padding:'3px 10px',borderRadius:9999,fontSize:11,fontWeight:700,letterSpacing:'0.5px'},
+
+  // -------- Admin sidebar --------
+  sidebar:{width:220,minHeight:'calc(100vh - 68px)',background:NV_DEEP,display:'flex',flexDirection:'column',flexShrink:0,borderRight:'1px solid rgba(255,255,255,0.04)'},
+  sidebarItem:{width:'100%',padding:'11px 18px',background:'transparent',border:'none',borderLeft:'2px solid transparent',textAlign:'left',color:'rgba(255,255,255,0.6)',fontSize:13,fontWeight:600,fontFamily:FONT_BODY,display:'flex',gap:11,alignItems:'center'},
+  sidebarItemActive:{width:'100%',padding:'11px 18px',background:'rgba(157,34,53,0.14)',border:'none',borderLeft:'2px solid '+CR,textAlign:'left',color:WH,fontSize:13,fontWeight:700,fontFamily:FONT_BODY,display:'flex',gap:11,alignItems:'center'},
+  glassCard:{background:'rgba(255,255,255,0.03)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:12,padding:22},
+  statCard:{background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:12,padding:'18px 20px',position:'relative',overflow:'hidden'},
+};
+
+// Tiny inline icons (stroke). Pass {size,color}
+const Icon = {
+  car:({size=20,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12l2-5a3 3 0 0 1 2.8-2h8.4A3 3 0 0 1 19 7l2 5"/><rect x="2" y="12" width="20" height="6" rx="2"/><circle cx="7" cy="18" r="1.5"/><circle cx="17" cy="18" r="1.5"/></svg>),
+  pin:({size=20,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s-7-7.5-7-13a7 7 0 0 1 14 0c0 5.5-7 13-7 13z"/><circle cx="12" cy="9" r="2.5"/></svg>),
+  list:({size=20,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="20" y2="6"/><line x1="8" y1="12" x2="20" y2="12"/><line x1="8" y1="18" x2="20" y2="18"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>),
+  chat:({size=20,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4l-5 1 1-5A8.4 8.4 0 1 1 21 11.5z"/></svg>),
+  dashboard:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>),
+  table:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>),
+  chart:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><line x1="4" y1="20" x2="20" y2="20"/><rect x="6" y="12" width="3" height="8"/><rect x="11" y="8" width="3" height="12"/><rect x="16" y="4" width="3" height="16"/></svg>),
+  search:({size=16,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>),
+  download:({size=14,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>),
+  printer:({size=16,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>),
+  lock:({size=14,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>),
+  check:({size=14,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="5 13 10 18 19 7"/></svg>),
+  door:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="3" width="14" height="18" rx="1"/><circle cx="15" cy="12" r="1" fill={c}/></svg>),
+  hood:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M2 14l3-6a2 2 0 0 1 1.8-1.2h10.4A2 2 0 0 1 19 8l3 6"/><path d="M2 14h20v4H2z"/></svg>),
+  phone:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.95.36 1.88.7 2.77a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.31-1.31a2 2 0 0 1 2.11-.45c.89.34 1.82.57 2.77.7A2 2 0 0 1 22 16.92z"/></svg>),
+  mail:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><polyline points="22 6 12 13 2 6"/></svg>),
+  clock:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>),
+  ticket:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9a3 3 0 0 0 0 6v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a3 3 0 0 0 0-6V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><line x1="9" y1="9" x2="9" y2="15"/></svg>),
+  parking:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 0 1 0 6H9"/></svg>),
+  building:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="2" width="16" height="20" rx="1"/><line x1="9" y1="6" x2="9" y2="6"/><line x1="15" y1="6" x2="15" y2="6"/><line x1="9" y1="10" x2="9" y2="10"/><line x1="15" y1="10" x2="15" y2="10"/><line x1="9" y1="14" x2="9" y2="14"/><line x1="15" y1="14" x2="15" y2="14"/><path d="M10 22v-4h4v4"/></svg>),
+  globe:({size=18,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 0 1 0 20"/><path d="M12 2a15 15 0 0 0 0 20"/></svg>),
+  plus:({size=16,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>),
+  x:({size=14,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>),
+  arrowRight:({size=16,c='currentColor'})=>(<svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>),
+};
+
+// HEADER
+function Header({view,nav,auth,onLogin,onLogout}) {
+  const links = [['register','Register'],['how-it-works','How It Works'],['location','Location'],['faqs','FAQs'],['contact','Contact']];
+  const adminViews = ['dashboard','manifest','reports'];
+  return (
+    <header style={s.header}>
+      <div style={s.headerInner}>
+        <div onClick={()=>nav('home')} style={s.logo}>
+          <div style={s.logoMark}>SV</div>
+          <div>
+            <div style={s.logoText}>Savannah Vehicle Exchange</div>
+            <div style={s.logoSub}>Weekend Car Market · Savannah, GA</div>
+          </div>
+        </div>
+        <nav style={s.nav}>
+          {links.map(([k,l])=>(
+            <button key={k} onClick={()=>nav(k)} style={view===k?s.navBtnActive:s.navBtn}>{l}</button>
+          ))}
+          <div style={{width:1,height:22,background:HAIRLINE,margin:'0 8px'}}/>
+          {auth ? (
+            <>
+              <button onClick={()=>nav('dashboard')} style={adminViews.includes(view)?s.navBtnActive:s.adminBtn}>
+                <Icon.dashboard size={14} c={adminViews.includes(view)?CR:NV}/> Admin
+              </button>
+              <button onClick={onLogout} style={{...s.navBtn,color:MUTED}}>Sign out</button>
+            </>
+          ) : (
+            <button onClick={onLogin} style={s.loginBtn}>
+              <Icon.lock size={13} c={WH}/>
+              <span style={{marginLeft:6}}>Staff Login</span>
+            </button>
+          )}
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+// SIDEBAR
+function AdminSidebar({view,nav,auth,onLogout}) {
+  const items = [
+    {id:'dashboard',l:'Dashboard',Ic:Icon.dashboard},
+    {id:'manifest',l:'Manifest',Ic:Icon.table},
+    {id:'reports',l:'Reports',Ic:Icon.chart},
+  ];
+  return (
+    <aside style={s.sidebar}>
+      <div style={{padding:'22px 18px',borderBottom:'1px solid rgba(255,255,255,0.06)'}}>
+        <div style={{fontSize:10,color:'rgba(255,255,255,0.4)',fontWeight:600,textTransform:'uppercase',letterSpacing:'1.5px',marginBottom:8}}>Signed in</div>
+        <div style={{display:'flex',alignItems:'center',gap:10}}>
+          <div style={{width:32,height:32,borderRadius:8,background:'rgba(201,165,87,0.18)',color:GOLD,display:'flex',alignItems:'center',justifyContent:'center',fontFamily:FONT_DISPLAY,fontSize:14,letterSpacing:1}}>
+            {(auth?.user||'A')[0].toUpperCase()}
+          </div>
+          <div>
+            <div style={{color:WH,fontSize:14,fontWeight:700,fontFamily:FONT_BODY,letterSpacing:'0.2px',lineHeight:1.2}}>{(auth?.user||'').replace(/^./,c=>c.toUpperCase())}</div>
+            <div style={{color:'rgba(255,255,255,0.4)',fontSize:11,marginTop:2}}>Staff Account</div>
+          </div>
+        </div>
+      </div>
+      <div style={{flex:1,padding:'12px 0'}}>
+        <div style={{fontSize:10,color:'rgba(255,255,255,0.35)',fontWeight:700,letterSpacing:'1.5px',textTransform:'uppercase',padding:'6px 18px 8px'}}>Main Menu</div>
+        {items.map(({id,l,Ic})=>(
+          <button key={id} onClick={()=>nav(id)} style={view===id?s.sidebarItemActive:s.sidebarItem}>
+            <Ic size={16} c={view===id?WH:'rgba(255,255,255,0.55)'}/>
+            <span>{l}</span>
+          </button>
+        ))}
+      </div>
+      <div style={{padding:14,borderTop:'1px solid rgba(255,255,255,0.06)'}}>
+        <button onClick={()=>nav('home')} style={{width:'100%',padding:'9px 12px',background:'rgba(255,255,255,0.04)',color:'rgba(255,255,255,0.7)',border:'1px solid rgba(255,255,255,0.08)',borderRadius:8,fontSize:12,fontFamily:FONT_BODY,fontWeight:600,display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>← Back to public site</button>
+        <button onClick={onLogout} style={{width:'100%',marginTop:8,padding:'8px',background:'transparent',border:'none',color:'rgba(192,57,43,0.7)',fontSize:11,fontFamily:FONT_BODY,fontWeight:600}}>Sign out</button>
+      </div>
+    </aside>
+  );
+}
+
+// HOME
+function HomePage({nav,vehicles}) {
+  const activeCount = vehicles.filter(v=>getStatus(v).l==='ACTIVE').length;
+  const thisWeek = vehicles.filter(v=>v.weekNumber===getWk(new Date())).length;
+  return (
+    <div>
+      <div style={s.hero}>
+        <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 70% 40%,rgba(157,34,53,0.15) 0%,transparent 60%)',pointerEvents:'none'}}/>
+        <div style={{maxWidth:'900px',margin:'0 auto',position:'relative'}}>
+          <div style={{display:'inline-block',background:'rgba(201,168,76,0.2)',border:'1px solid rgba(201,168,76,0.4)',borderRadius:'20px',padding:'6px 16px',marginBottom:'24px'}}>
+            <span style={{color:'#c9a557',fontSize:'12px',fontWeight:700,letterSpacing:'2px'}}>EVERY WEEKEND · SAVANNAH, GA</span>
+          </div>
+          <h1 style={s.heroTitle}>
+            <span style={{color:CR,display:'block'}}>SAVANNAH</span>
+            <span style={{color:WH,display:'block'}}>VEHICLE EXCHANGE</span>
+          </h1>
+          <p style={{fontSize:'18px',color:'rgba(255,255,255,0.75)',fontFamily:"'Montserrat',sans-serif",marginBottom:'40px',maxWidth:'600px',margin:'0 auto 40px'}}>
+            The Lowcountry's premier weekend car market at Savannah Technical College
+          </p>
+          <div style={{display:'flex',gap:'16px',justifyContent:'center',flexWrap:'wrap'}}>
+            <button onClick={()=>nav('register')} style={{...s.btn,padding:'16px 40px',fontSize:'16px',boxShadow:'0 8px 24px rgba(157,34,53,0.4)'}}>Register Your Vehicle</button>
+            <button onClick={()=>nav('how-it-works')} style={{...s.btnOut,padding:'16px 36px',fontSize:'16px',color:WH,borderColor:'rgba(255,255,255,0.5)'}}>How It Works</button>
+          </div>
+        </div>
+      </div>
+      <div style={s.statsBar}>
+        <div style={s.statsInner}>
+          {[{n:thisWeek,l:'Vehicles This Weekend'},{n:activeCount,l:'Active Listings'},{n:vehicles.length,l:'Total Registered All-Time'}].map(({n,l})=>(
+            <div key={l} style={s.statItem}>
+              <span style={s.statNum}>{n}</span>
+              <span style={s.statLabel}>{l}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{...s.section,display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))',gap:'24px'}}>
+        {[
+          {icon:'🚗',title:'Register Online',desc:'Secure your spot for the weekend in minutes. Single weekend ($25) or 90-day program ($75).',action:'register',btn:'Register Now'},
+          {icon:'📍',title:'Prime Location',desc:'Every weekend at Savannah Technical College — easy access, high foot traffic, free entry.',action:'location',btn:'Get Directions'},
+          {icon:'📋',title:'Show Until It Sells',desc:'90-day multi-week listing. Stay until your vehicle sells — maximum exposure, one flat fee.',action:'how-it-works',btn:'Learn More'},
+          {icon:'💬',title:'Direct Seller Access',desc:'QR-coded registration cards link buyers directly to your contact info. No middleman.',action:'faqs',btn:'See FAQs'},
+        ].map(({icon,title,desc,action,btn})=>(
+          <div key={title} style={{...s.card,display:'flex',flexDirection:'column',gap:'12px'}}>
+            <div style={{fontSize:'36px'}}>{icon}</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'22px',color:NV,letterSpacing:'1px'}}>{title}</div>
+            <div style={{fontSize:'13px',color:'#666',lineHeight:1.6,flex:1}}>{desc}</div>
+            <button onClick={()=>nav(action)} style={{padding:'10px',background:'rgba(157,34,53,0.08)',color:CR,border:'1px solid rgba(157,34,53,0.2)',borderRadius:'6px',fontSize:'12px',fontWeight:700,cursor:'pointer',fontFamily:"'Montserrat',sans-serif"}}>{btn}</button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// REGISTER
+function RegisterPage({setVehicles,nav}) {
+  const blank={vehicleType:'',year:'',make:'',makeOther:'',model:'',modelOther:'',vin:'',trim:'',miles:'',price:'',description:'',openDoors:false,openHood:false,okayToCall:false,okayToText:false,contactName:'',contactPhone:'',contactEmail:'',registrationType:'single'};
+  const [form,setForm]=useState(blank);
+  const [done,setDone]=useState(null);
+  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+  const wc=form.description.trim()===''?0:form.description.trim().split(/\s+/).length;
+  const avModels=useMemo(()=>{
+    if(!form.make||form.make==='-- Select Make --') return ['-- Select Make First --'];
+    if(form.make==='Other') return ['Other'];
+    return ['-- Select Model --',...(MM[form.make]||['Other'])];
+  },[form.make]);
+  const handleDesc=e=>{const t=e.target.value;if(t.trim()===''||t.trim().split(/\s+/).length<=500)set('description',t)};
+  const handleMake=val=>setForm(f=>({...f,make:val,makeOther:'',model:'',modelOther:''}));
+  const doSticker=v=>printSticker(v,getStatus,fmt$,fmtMi,fmtD);
+  const handleSubmit=e=>{
+    e.preventDefault();
+    const finalMake=form.make==='Other'?form.makeOther:form.make;
+    const finalModel=form.model==='Other'?form.modelOther:form.model;
+    const rd=new Date().toISOString();
+    const ed=form.registrationType==='single'
+      ?(()=>{const d=new Date();const dy=(5-d.getDay()+7)%7;d.setDate(d.getDate()+(dy||7));d.setHours(23,59,59,999);return d.toISOString()})()
+      :(()=>{const d=new Date();d.setDate(d.getDate()+90);return d.toISOString()})();
+    const v={...form,make:finalMake,model:finalModel,id:Date.now(),regNumber:genReg(),registrationDate:rd,expirationDate:ed,weekNumber:getWk(rd),status:'active',miles:Number(form.miles),price:Number(form.price)};
+    setVehicles(p=>[...p,v]);setDone(v);setForm(blank);
+    setTimeout(()=>doSticker(v),600);
+  };
+  const sel={...s.input,cursor:'pointer'};
+  if(done) return (
+    <div style={{maxWidth:'600px',margin:'60px auto',padding:'0 24px'}}>
+      <div style={{...s.card,textAlign:'center',padding:'44px'}}>
+        <div style={{fontSize:'52px',marginBottom:'12px'}}>&#x2705;</div>
+        <h2 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'36px',color:NV,letterSpacing:'2px',marginBottom:'8px'}}>REGISTRATION CONFIRMED</h2>
+        <div style={{background:CR,color:WH,padding:'14px',fontFamily:"'Bebas Neue',sans-serif",fontSize:'24px',letterSpacing:'3px',borderRadius:'6px',margin:'20px 0'}}>{done.regNumber}</div>
+        <p style={{color:'#666',fontSize:'13px',marginBottom:'20px',lineHeight:1.6}}>{done.year} {done.make} {done.model} &bull; Expires {fmtD(done.expirationDate)}</p>
+        <div style={{background:'#f0faf4',border:'1px solid #c3e6cb',borderRadius:'8px',padding:'16px',marginBottom:'18px',textAlign:'left'}}>
+          <div style={{fontSize:'11px',fontWeight:700,color:'#2d8a4e',textTransform:'uppercase',letterSpacing:'1px',marginBottom:'10px'}}>&#x2713; Notifications Dispatched</div>
+          <div style={{background:WH,padding:'8px 12px',borderRadius:'5px',border:'1px solid #c3e6cb',marginBottom:'8px',fontSize:'12px'}}>
+            <strong style={{background:'#2d8a4e',color:WH,borderRadius:'3px',padding:'1px 6px',fontSize:'9px',marginRight:'8px'}}>EMAIL</strong> Confirmation sent to <strong>{done.contactEmail}</strong>
+          </div>
+          <div style={{background:WH,padding:'8px 12px',borderRadius:'5px',border:'1px solid #c3e6cb',fontSize:'12px'}}>
+            <strong style={{background:'#2d8a4e',color:WH,borderRadius:'3px',padding:'1px 6px',fontSize:'9px',marginRight:'8px'}}>TEXT</strong> Registration # sent to <strong>{done.contactPhone}</strong>
+          </div>
+        </div>
+        <div style={{display:'flex',gap:'12px',justifyContent:'center',flexWrap:'wrap'}}>
+          <button style={{...s.btn,background:'linear-gradient(135deg,#1a2b4a,#0d1829)'}} onClick={()=>doSticker(done)}>&#x1F5A8; Print Window Sticker</button>
+          <button style={s.btnOut} onClick={()=>setDone(null)}>Register Another</button>
+        </div>
+      </div>
+    </div>
+  );
+  return (
+    <div style={{maxWidth:'860px',margin:'40px auto',padding:'0 24px'}}>
+      <div style={{marginBottom:'32px'}}>
+        <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'56px',color:NV,letterSpacing:'3px'}}>VEHICLE REGISTRATION</h1>
+      </div>
+      <form onSubmit={handleSubmit}>
+        <div style={{...s.card,marginBottom:'20px'}}>
+          <h3 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'22px',color:NV,letterSpacing:'1px',marginBottom:'20px'}}>REGISTRATION TYPE</h3>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px'}}>
+            {[{v:'single',l:'Single Weekend',p:25,sub:'One weekend event'},{v:'multi',l:'Show Until It Sells',p:75,sub:'Valid 90 days'}].map(({v,l,p,sub})=>(
+              <label key={v} onClick={()=>set('registrationType',v)} style={{border:`2px solid ${form.registrationType===v?CR:'#e0e0e0'}`,borderRadius:'8px',padding:'16px',cursor:'pointer',background:form.registrationType===v?'rgba(157,34,53,0.05)':WH,display:'block'}}>
+                <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'4px'}}>
+                  <span style={{fontWeight:700,color:NV}}>{l}</span>
+                  <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'22px',color:CR}}>${p}</span>
+                </div>
+                <div style={{fontSize:'11px',color:'#888'}}>{sub}</div>
+              </label>
+            ))}
+          </div>
+        </div>
+        <div style={{...s.card,marginBottom:'20px'}}>
+          <h3 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'22px',color:NV,letterSpacing:'1px',marginBottom:'20px'}}>VEHICLE INFORMATION</h3>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'16px',marginBottom:'16px'}}>
+            <div><label style={s.label}>Vehicle Type *</label>
+              <select value={form.vehicleType} onChange={e=>set('vehicleType',e.target.value)} style={sel} required>
+                <option value="">-- Select Type --</option>
+                {VTYPES.map(t=><option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+            <div><label style={s.label}>Year *</label>
+              <select value={form.year} onChange={e=>set('year',e.target.value)} style={sel} required>
+                <option value="">-- Select Year --</option>
+                {YLIST.map(y=><option key={y} value={y}>{y}</option>)}
+              </select>
+            </div>
+            <div><label style={s.label}>Make *</label>
+              <select value={form.make} onChange={e=>handleMake(e.target.value)} style={sel} required>
+                {ALL_MAKES.map(m=><option key={m} value={m}>{m}</option>)}
+              </select>
+              {form.make==='Other'&&<input value={form.makeOther} onChange={e=>set('makeOther',e.target.value)} placeholder="Enter make..." style={{...s.input,marginTop:'8px'}} required/>}
+            </div>
+            <div><label style={s.label}>Model *</label>
+              <select value={form.model} onChange={e=>set('model',e.target.value)} style={{...sel,opacity:(!form.make||form.make==='-- Select Make --')?0.5:1}} required disabled={!form.make||form.make==='-- Select Make --'}>
+                {avModels.map(m=><option key={m} value={m}>{m}</option>)}
+              </select>
+              {form.model==='Other'&&<input value={form.modelOther} onChange={e=>set('modelOther',e.target.value)} placeholder="Enter model..." style={{...s.input,marginTop:'8px'}} required/>}
+            </div>
+            <div><label style={s.label}>Trim</label><input value={form.trim} onChange={e=>set('trim',e.target.value)} placeholder="GT, LTZ, TRD..." style={s.input}/></div>
+            <div><label style={s.label}>VIN / Serial *</label><input value={form.vin} onChange={e=>set('vin',e.target.value)} placeholder="17-character VIN" style={s.input} required/></div>
+            <div><label style={s.label}>Mileage *</label><input type="number" min="0" value={form.miles} onChange={e=>set('miles',e.target.value)} placeholder="25000" style={s.input} required/></div>
+            <div><label style={s.label}>Asking Price ($) *</label><input type="number" min="0" value={form.price} onChange={e=>set('price',e.target.value)} placeholder="18500" style={s.input} required/></div>
+          </div>
+          <div style={{marginBottom:'18px'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'8px'}}>
+              <label style={{...s.label,margin:0}}>Description</label>
+              <span style={{fontSize:'11px',fontWeight:700,color:wc>480?CR:wc>400?'#cc8a00':'#888'}}>{wc} / 500 words</span>
+            </div>
+            <textarea value={form.description} onChange={handleDesc} placeholder="Features, condition, modifications, service history... (max 500 words)" rows={4} style={{...s.input,resize:'vertical',borderColor:wc>=500?CR:'rgba(157,34,53,0.2)'}}/>
+            {wc>=500&&<div style={{fontSize:'11px',color:CR,marginTop:'3px',fontWeight:600}}>500 word limit reached</div>}
+          </div>
+          <div>
+            <label style={{...s.label,marginBottom:'12px'}}>Access &amp; Contact Preferences</label>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'10px'}}>
+              {[{k:'openDoors',l:'Allow Doors to be Opened',e:'🚪'},{k:'openHood',l:'Allow Hood to be Opened',e:'🔧'},{k:'okayToCall',l:'Okay to Call',e:'📞'},{k:'okayToText',l:'Okay to Text',e:'💬'}].map(({k,l,e})=>(
+                <label key={k} onClick={()=>set(k,!form[k])} style={{display:'flex',alignItems:'center',gap:'10px',padding:'12px 14px',border:`2px solid ${form[k]?CR:'#e0e0e0'}`,borderRadius:'8px',cursor:'pointer',background:form[k]?'rgba(157,34,53,0.05)':'#f7f5f0',userSelect:'none'}}>
+                  <div style={{width:'20px',height:'20px',borderRadius:'4px',border:`2px solid ${form[k]?CR:'#ccc'}`,background:form[k]?CR:'transparent',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                    {form[k]&&<span style={{color:WH,fontSize:'13px'}}>&#x2713;</span>}
+                  </div>
+                  <span style={{fontSize:'20px'}}>{e}</span>
+                  <span style={{fontSize:'12px',fontWeight:600,color:form[k]?CR:NV}}>{l}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div style={{...s.card,marginBottom:'20px'}}>
+          <h3 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'22px',color:NV,letterSpacing:'1px',marginBottom:'20px'}}>CONTACT INFORMATION</h3>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(200px,1fr))',gap:'16px'}}>
+            <div><label style={s.label}>Full Name *</label><input value={form.contactName} onChange={e=>set('contactName',e.target.value)} placeholder="Your full name" style={s.input} required/></div>
+            <div><label style={s.label}>Phone *</label><input type="tel" value={form.contactPhone} onChange={e=>set('contactPhone',e.target.value)} placeholder="912-555-0000" style={s.input} required/></div>
+            <div><label style={s.label}>Email *</label><input type="email" value={form.contactEmail} onChange={e=>set('contactEmail',e.target.value)} placeholder="you@email.com" style={s.input} required/></div>
+          </div>
+        </div>
+        <div style={{background:`linear-gradient(135deg,${CR},#7a1a2a)`,borderRadius:'8px',padding:'16px 24px',marginBottom:'16px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <span style={{color:'rgba(255,255,255,0.8)',fontSize:'13px',letterSpacing:'1px',textTransform:'uppercase'}}>Registration Fee</span>
+          <span style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'28px',color:WH,letterSpacing:'2px'}}>${form.registrationType==='multi'?75:25}</span>
+        </div>
+        <button type="submit" style={{...s.btn,width:'100%',padding:'16px',fontSize:'15px'}}>Submit Registration</button>
+      </form>
+    </div>
+  );
+}
+
+
+// HOW IT WORKS
+function HowItWorksPage() {
+  return (
+    <div style={{maxWidth:'800px',margin:'60px auto',padding:'0 32px'}}>
+      <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'56px',color:NV,letterSpacing:'3px',marginBottom:'32px'}}>HOW IT WORKS</h1>
+      <div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
+        {[
+          {n:'01',t:'Register Your Vehicle',d:'Fill out the online registration form. Choose single weekend ($25) or 90-day Show Until It Sells ($75). Receive your unique reg number instantly.'},
+          {n:'02',t:'Print Your Registration Card',d:'Download and print your personalized card with SVE letterhead, vehicle details, and QR code for buyers to scan.'},
+          {n:'03',t:'Show Up & Display',d:'Arrive at Savannah Technical College any weekend during event hours. Staff verifies your registration.'},
+          {n:'04',t:'Connect With Buyers',d:'Buyers scan your QR code or contact you directly. You control all access permissions.'},
+          {n:'05',t:'Close The Deal',d:'Handle the transaction privately. Notify SVE staff when sold so we can update the manifest.'},
+        ].map(({n,t,d})=>(
+          <div key={n} style={{...s.card,display:'flex',gap:'20px',alignItems:'flex-start'}}>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'48px',color:CR,opacity:0.25,flexShrink:0,lineHeight:1,width:'52px'}}>{n}</div>
+            <div>
+              <h3 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'22px',color:NV,letterSpacing:'1px',marginBottom:'6px'}}>{t}</h3>
+              <p style={{fontSize:'13px',color:'#666',lineHeight:1.7}}>{d}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// LOCATION
+function LocationPage() {
+  return (
+    <div style={{maxWidth:'880px',margin:'60px auto',padding:'0 32px'}}>
+      <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'56px',color:NV,letterSpacing:'3px',marginBottom:'32px'}}>LOCATION</h1>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1.2fr',gap:'24px'}}>
+        <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
+          {[{icon:'🏫',l:'Venue',v:'Savannah Technical College'},{icon:'📍',l:'Address',v:'5717 White Bluff Rd\nSavannah, GA 31405'},{icon:'🕗',l:'Event Hours',v:'Sat & Sun · 8:00 AM – 4:00 PM'},{icon:'🎟',l:'Entry',v:'Free for buyers\nSellers pay registration fee'},{icon:'🅿️',l:'Parking',v:'Free on-site parking'}].map(({icon,l,v})=>(
+            <div key={l} style={{...s.card,display:'flex',gap:'12px',alignItems:'flex-start',padding:'14px 16px'}}>
+              <span style={{fontSize:'20px',flexShrink:0}}>{icon}</span>
+              <div>
+                <div style={s.label}>{l}</div>
+                <div style={{fontSize:'13px',color:NV,fontWeight:600,whiteSpace:'pre-line'}}>{v}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div style={{...s.card,overflow:'hidden',minHeight:'320px',padding:0}}>
+          <iframe title="SVE Location" src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3363.5!2d-81.1253!3d31.9804!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x88fb9f3da80a0419%3A0x2f3b5c7d8e9f0a1b!2sSavannah%20Technical%20College!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus" width="100%" height="100%" style={{border:'none',minHeight:'320px'}} allowFullScreen loading="lazy"/>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// FAQS
+function FAQsPage() {
+  const [open,setOpen] = useState(null);
+  const faqs = [
+    {q:'How do I register my vehicle?',a:'Fill out the online registration form on this site. Choose single weekend ($25) or 90-day Show Until It Sells ($75). You\'ll receive a unique reg number and printable registration card immediately.'},
+    {q:'What vehicle types are accepted?',a:'All vehicles: sedans, SUVs, trucks, motorcycles, classics, convertibles, minivans, and more.'},
+    {q:'Where is the event held?',a:'Savannah Technical College, 5717 White Bluff Rd, Savannah GA 31405. Specific lot info is in your confirmation email.'},
+    {q:'Can buyers test drive vehicles?',a:'Test drives are at the seller\'s discretion. All arrangements must be made directly between buyer and seller.'},
+    {q:'What if my vehicle sells?',a:'Notify SVE staff so we can update the manifest. Registration fees are non-refundable.'},
+    {q:'Can I restrict who accesses my vehicle?',a:'Yes. You choose door and hood access during registration. Staff enforces your preferences.'},
+    {q:'What does the 90-day program include?',a:'One fee of $75 covers every weekend for 90 days (~12 weekends). Show up any weekend within that period.'},
+    {q:'Do I need to be present at the event?',a:'We strongly recommend it. Buyers prefer direct communication with sellers.'},
+  ];
+  return (
+    <div style={{maxWidth:'760px',margin:'60px auto',padding:'0 32px'}}>
+      <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'56px',color:NV,letterSpacing:'3px',marginBottom:'32px'}}>FAQS</h1>
+      <div style={{display:'flex',flexDirection:'column',gap:'4px'}}>
+        {faqs.map(({q,a},i)=>(
+          <div key={i} style={{...s.card,overflow:'hidden',padding:0}}>
+            <button onClick={()=>setOpen(open===i?null:i)} style={{width:'100%',padding:'16px 20px',background:'transparent',border:'none',cursor:'pointer',display:'flex',justifyContent:'space-between',alignItems:'center',textAlign:'left'}}>
+              <span style={{fontWeight:700,color:NV,fontSize:'14px'}}>{q}</span>
+              <span style={{color:CR,fontSize:'20px',transform:open===i?'rotate(45deg)':'none',transition:'transform 0.2s',flexShrink:0,marginLeft:'12px'}}>+</span>
+            </button>
+            {open===i&&<div style={{padding:'0 20px 16px',color:'#666',fontSize:'13px',lineHeight:1.7,borderTop:'1px solid #f0f0f0'}}><div style={{paddingTop:'12px'}}>{a}</div></div>}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// CONTACT
+function ContactPage() {
+  const [form,setForm] = useState({name:'',email:'',phone:'',subject:'',message:''});
+  const [sent,setSent] = useState(false);
+  const set = (k,v)=>setForm(f=>({...f,[k]:v}));
+  return (
+    <div style={{maxWidth:'800px',margin:'60px auto',padding:'0 32px'}}>
+      <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'56px',color:NV,letterSpacing:'3px',marginBottom:'32px'}}>CONTACT US</h1>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1.5fr',gap:'24px'}}>
+        <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
+          {[{icon:'📞',l:'Phone',v:'(912) 555-0100'},{icon:'📧',l:'Email',v:'info@savannahvehicleexchange.com'},{icon:'🌐',l:'Website',v:'SavannahVehicleExchange.com'},{icon:'📍',l:'Address',v:'5717 White Bluff Rd\nSavannah, GA 31405'}].map(({icon,l,v})=>(
+            <div key={l} style={{...s.card,padding:'14px 16px'}}>
+              <div style={{fontSize:'18px',marginBottom:'4px'}}>{icon}</div>
+              <div style={s.label}>{l}</div>
+              <div style={{fontSize:'12px',color:'#666',whiteSpace:'pre-line'}}>{v}</div>
+            </div>
+          ))}
+        </div>
+        <div style={s.card}>
+          {sent?(
+            <div style={{textAlign:'center',padding:'32px 0'}}>
+              <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'28px',color:NV,letterSpacing:'1px',marginBottom:'8px'}}>MESSAGE SENT</div>
+              <p style={{color:'#666',fontSize:'13px',marginBottom:'20px'}}>We'll respond within 24 hours.</p>
+              <button style={s.btn} onClick={()=>setSent(false)}>Send Another</button>
+            </div>
+          ):(
+            <form onSubmit={e=>{e.preventDefault();setSent(true)}} style={{display:'flex',flexDirection:'column',gap:'14px'}}>
+              {[{k:'name',l:'Name',ph:'Your name'},{k:'email',l:'Email',type:'email',ph:'you@email.com'},{k:'phone',l:'Phone',type:'tel',ph:'912-555-0000'},{k:'subject',l:'Subject',ph:'How can we help?'}].map(({k,l,type='text',ph})=>(
+                <div key={k}><label style={s.label}>{l}</label><input style={s.input} type={type} value={form[k]} onChange={e=>set(k,e.target.value)} placeholder={ph}/></div>
+              ))}
+              <div><label style={s.label}>Message</label><textarea style={{...s.input,resize:'vertical'}} rows={4} value={form.message} onChange={e=>set('message',e.target.value)} placeholder="Your message..."/></div>
+              <button type="submit" style={{...s.btn,width:'100%',padding:'14px'}}>Send Message →</button>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// DASHBOARD
+function DashboardPage({vehicles}) {
+  const curWk = getWk(new Date());
+  const stats = {
+    total:vehicles.length,
+    active:vehicles.filter(v=>getStatus(v).l==='ACTIVE').length,
+    thisWeek:vehicles.filter(v=>v.weekNumber===curWk).length,
+    sold:vehicles.filter(v=>v.status==='sold').length,
+    fees:vehicles.reduce((s,v)=>s+(v.registrationType==='multi'?75:25),0),
+    listVal:vehicles.filter(v=>getStatus(v).l==='ACTIVE').reduce((s,v)=>s+(v.price||0),0),
+  };
+  const recent = [...vehicles].sort((a,b)=>new Date(b.registrationDate)-new Date(a.registrationDate)).slice(0,8);
+  return (
+    <div style={{flex:1,overflowY:'auto',padding:'28px',background:'#0d1829'}}>
+      <div style={{marginBottom:'24px'}}>
+        <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'32px',color:WH,letterSpacing:'2px'}}>OPERATIONS DASHBOARD</h1>
+        <p style={{color:'#666',fontSize:'12px',marginTop:'4px'}}>Week {curWk} · {new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})}</p>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(170px,1fr))',gap:'12px',marginBottom:'24px'}}>
+        {[
+          {l:'Total Registered',v:stats.total,sub:'All-time',c:'rgba(255,255,255,0.3)'},
+          {l:'Active Listings',v:stats.active,sub:`${stats.sold} sold`,c:'rgba(45,138,78,0.5)'},
+          {l:'This Weekend',v:stats.thisWeek,sub:`Week ${curWk}`,c:CR},
+          {l:'Fees Collected',v:'$'+stats.fees.toLocaleString(),sub:'Registration revenue',c:'rgba(201,165,87,0.5)'},
+          {l:'Active List Value',v:'$'+Math.round(stats.listVal/1000)+'K',sub:'Combined asking',c:'rgba(91,141,217,0.5)'},
+        ].map(({l,v,sub,c})=>(
+          <div key={l} style={{...s.statCard,borderLeft:`3px solid ${c}`}}>
+            <div style={{fontSize:'9px',color:'#666',fontWeight:600,textTransform:'uppercase',letterSpacing:'1px',marginBottom:'6px'}}>{l}</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'32px',color:WH,letterSpacing:'1px',lineHeight:1}}>{v}</div>
+            <div style={{fontSize:'10px',color:'#555',marginTop:'4px'}}>{sub}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{...s.glassCard}}>
+        <div style={{fontSize:'12px',color:'#888',fontWeight:600,marginBottom:'14px',letterSpacing:'0.5px'}}>RECENT REGISTRATIONS</div>
+        <table style={{width:'100%',borderCollapse:'collapse'}}>
+          <thead><tr style={{borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
+            {['Reg #','Vehicle','Contact','Type','Price','Status','Date'].map(h=><th key={h} style={{padding:'8px 10px',textAlign:'left',fontSize:'9px',color:'#555',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px'}}>{h}</th>)}
+          </tr></thead>
+          <tbody>
+            {recent.map(v=>{const st=getStatus(v);return(
+              <tr key={v.id} style={{borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
+                <td style={{padding:'10px',fontFamily:"'Bebas Neue',sans-serif",color:CR,fontSize:'12px',letterSpacing:'1px'}}>{v.regNumber}</td>
+                <td style={{padding:'10px',fontSize:'12px',color:WH}}>{v.year} {v.make} {v.model}</td>
+                <td style={{padding:'10px',fontSize:'11px',color:'#888'}}>{v.contactName}</td>
+                <td style={{padding:'10px'}}><span style={{background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'3px',padding:'2px 7px',fontSize:'9px',fontWeight:700,color:'#888'}}>{v.registrationType==='multi'?'90-DAY':'SINGLE'}</span></td>
+                <td style={{padding:'10px',fontSize:'12px',color:WH,fontWeight:600}}>{fmt$(v.price)}</td>
+                <td style={{padding:'10px'}}><span style={{background:st.c+'22',border:`1px solid ${st.c}44`,borderRadius:'3px',padding:'2px 7px',fontSize:'9px',fontWeight:700,color:st.c}}>{st.l}</span></td>
+                <td style={{padding:'10px',fontSize:'11px',color:'#555',whiteSpace:'nowrap'}}>{fmtD(v.registrationDate)}</td>
+              </tr>
+            );})}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// MANIFEST
+function ManifestPage({vehicles,setVehicles}) {
+  const [search,setSearch]=useState('');const [typeF,setTypeF]=useState('all');const [regF,setRegF]=useState('all');const [stF,setStF]=useState('all');const [sel,setSel]=useState(null);const [confirm,setConfirm]=useState(null);
+  const weeks=[...new Set(vehicles.map(v=>v.weekNumber))].sort((a,b)=>b-a);
+  const types=[...new Set(vehicles.map(v=>v.vehicleType))].sort();
+  const filtered = useMemo(()=>vehicles.filter(v=>{
+    const q=search.toLowerCase();
+    const m=!q||[v.regNumber,v.make,v.model,v.contactName,v.vehicleType].some(x=>(x||'').toLowerCase().includes(q));
+    return m&&(typeF==='all'||v.vehicleType===typeF)&&(regF==='all'||v.registrationType===regF)&&(stF==='all'||getStatus(v).l.toLowerCase()===stF);
+  }),[vehicles,search,typeF,regF,stF]);
+  const updateStatus=(id,status)=>{setVehicles(vs=>vs.map(v=>v.id===id?{...v,status}:v));setSel(p=>p&&p.id===id?{...p,status}:p);};
+  const deleteVehicle=id=>{setVehicles(vs=>vs.filter(v=>v.id!==id));setConfirm(null);setSel(null);};
+  return (
+    <div style={{flex:1,overflowY:'auto',padding:'28px',background:'#0d1829',position:'relative'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:'20px',flexWrap:'wrap',gap:'12px'}}>
+        <div>
+          <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'32px',color:WH,letterSpacing:'2px'}}>CUSTOMER MANIFEST</h1>
+          <p style={{color:'#555',fontSize:'12px',marginTop:'2px'}}>{filtered.length} of {vehicles.length} registrations</p>
+        </div>
+        <button style={{...s.btn,padding:'9px 18px',fontSize:'12px'}} onClick={()=>csvExport(filtered)}>⬇ Export CSV</button>
+      </div>
+      <div style={{...s.glassCard,padding:'14px 16px',marginBottom:'14px',display:'flex',gap:'10px',flexWrap:'wrap',alignItems:'center'}}>
+        <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search reg, make, model, contact..." style={{flex:'1',minWidth:'200px',padding:'8px 12px',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'4px',fontSize:'12px',color:WH,outline:'none',fontFamily:"'Montserrat',sans-serif"}}/>
+        {[{v:typeF,set:setTypeF,opts:[['all','All Types'],...types.map(t=>[t,t])]},{v:regF,set:setRegF,opts:[['all','All Reg'],['single','Single'],['multi','90-Day']]},{v:stF,set:setStF,opts:[['all','All Status'],['active','Active'],['sold','Sold'],['expired','Expired']]}].map(({v,set,opts},i)=>(
+          <select key={i} value={v} onChange={e=>set(e.target.value)} style={{padding:'8px 10px',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'4px',fontSize:'11px',color:WH,outline:'none',cursor:'pointer',fontFamily:"'Montserrat',sans-serif"}}>
+            {opts.map(([val,txt])=><option key={val} value={val} style={{background:'#1a2845'}}>{txt}</option>)}
+          </select>
+        ))}
+      </div>
+      <div style={{...s.glassCard,padding:0,overflow:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse',minWidth:'800px'}}>
+          <thead style={{borderBottom:'1px solid rgba(255,255,255,0.08)',background:'rgba(255,255,255,0.02)'}}>
+            <tr>{['Reg #','Type','Year','Make','Model','Miles','Price','Contact','Reg','Status','Actions'].map(h=><th key={h} style={{padding:'10px 12px',textAlign:'left',fontSize:'9px',color:'#555',fontWeight:700,textTransform:'uppercase',letterSpacing:'1px'}}>{h}</th>)}</tr>
+          </thead>
+          <tbody>
+            {filtered.map((v,i)=>{const st=getStatus(v);return(
+              <tr key={v.id} style={{borderBottom:'1px solid rgba(255,255,255,0.04)',cursor:'pointer'}}>
+                <td onClick={()=>setSel(v)} style={{padding:'11px 12px',fontFamily:"'Bebas Neue',sans-serif",color:CR,fontSize:'11px',letterSpacing:'1px'}}>{v.regNumber}</td>
+                <td style={{padding:'11px 12px',fontSize:'11px',color:'#888'}}>{v.vehicleType}</td>
+                <td style={{padding:'11px 12px',fontSize:'11px',color:'#666'}}>{v.year}</td>
+                <td style={{padding:'11px 12px',fontSize:'12px',color:WH,fontWeight:600}}>{v.make}</td>
+                <td style={{padding:'11px 12px',fontSize:'12px',color:WH}}>{v.model}</td>
+                <td style={{padding:'11px 12px',fontSize:'11px',color:'#555'}}>{fmtMi(v.miles)}</td>
+                <td style={{padding:'11px 12px',fontSize:'12px',color:WH,fontWeight:600}}>{fmt$(v.price)}</td>
+                <td style={{padding:'11px 12px',fontSize:'11px',color:'#888'}}>{v.contactName}</td>
+                <td style={{padding:'11px 12px'}}><span style={{background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'3px',padding:'2px 7px',fontSize:'9px',fontWeight:700,color:'#888'}}>{v.registrationType==='multi'?'90-DAY':'SINGLE'}</span></td>
+                <td style={{padding:'11px 12px'}}><span style={{background:st.c+'22',border:`1px solid ${st.c}44`,borderRadius:'3px',padding:'2px 7px',fontSize:'9px',fontWeight:700,color:st.c}}>{st.l}</span></td>
+                <td style={{padding:'11px 12px'}}>
+                  <div style={{display:'flex',gap:'4px'}}>
+                    <button onClick={()=>setSel(v)} style={{padding:'4px 8px',background:'rgba(157,34,53,0.1)',border:'1px solid rgba(157,34,53,0.2)',borderRadius:'3px',fontSize:'9px',color:CR,cursor:'pointer',fontWeight:700}}>View</button>
+                    {st.l!=='SOLD'&&<button onClick={()=>updateStatus(v.id,'sold')} style={{padding:'4px 8px',background:'rgba(45,138,78,0.1)',border:'1px solid rgba(45,138,78,0.2)',borderRadius:'3px',fontSize:'9px',color:'#2d8a4e',cursor:'pointer',fontWeight:700}}>Sold</button>}
+                    <button onClick={()=>setConfirm(v.id)} style={{padding:'4px 8px',background:'rgba(192,57,43,0.1)',border:'1px solid rgba(192,57,43,0.2)',borderRadius:'3px',fontSize:'9px',color:'#c0392b',cursor:'pointer',fontWeight:700}}>✕</button>
+                  </div>
+                </td>
+              </tr>
+            );})}
+          </tbody>
+        </table>
+        {filtered.length===0&&<div style={{padding:'48px',textAlign:'center',color:'#555',fontSize:'13px'}}>No registrations match your filters.</div>}
+      </div>
+      {sel&&(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:2000,display:'flex',alignItems:'center',justifyContent:'center',padding:'20px'}} onClick={()=>setSel(null)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:'#141118',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'12px',width:'580px',maxWidth:'100%',maxHeight:'90vh',overflow:'auto'}}>
+            <div style={{background:'linear-gradient(135deg,rgba(157,34,53,0.2),rgba(14,12,18,0))',padding:'22px 24px',borderBottom:'1px solid rgba(255,255,255,0.08)',display:'flex',justifyContent:'space-between',alignItems:'flex-start'}}>
+              <div>
+                <div style={{fontFamily:"'Bebas Neue',sans-serif",color:CR,fontSize:'13px',letterSpacing:'2px',marginBottom:'4px'}}>{sel.regNumber}</div>
+                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'24px',color:WH}}>{sel.year} {sel.make} {sel.model}</div>
+              </div>
+              <button onClick={()=>setSel(null)} style={{background:'rgba(255,255,255,0.06)',border:'none',color:'#888',width:'30px',height:'30px',borderRadius:'50%',cursor:'pointer',fontSize:'16px'}}>×</button>
+            </div>
+            <div style={{padding:'20px 24px'}}>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'8px',marginBottom:'16px'}}>
+                {[['Type',sel.vehicleType],['Trim',sel.trim],['VIN',sel.vin],['Mileage',fmtMi(sel.miles)],['Price',fmt$(sel.price)],['Reg Type',sel.registrationType==='multi'?'90-Day ($75)':'Single ($25)'],['Expires',fmtD(sel.expirationDate)],['Doors',sel.openDoors?'✓ Allowed':'✗ Closed']].map(([k,v])=>(
+                  <div key={k} style={{background:'rgba(255,255,255,0.03)',borderRadius:'4px',padding:'9px 12px'}}>
+                    <div style={{fontSize:'9px',color:CR,textTransform:'uppercase',letterSpacing:'1.5px',fontWeight:700,marginBottom:'3px'}}>{k}</div>
+                    <div style={{fontSize:'12px',color:WH,fontWeight:500}}>{v}</div>
+                  </div>
+                ))}
+              </div>
+              {sel.description&&<div style={{background:'rgba(255,255,255,0.03)',borderRadius:'4px',padding:'12px',marginBottom:'14px',borderLeft:'2px solid '+CR}}>
+                <div style={{fontSize:'9px',color:CR,textTransform:'uppercase',letterSpacing:'1.5px',fontWeight:700,marginBottom:'6px'}}>Description</div>
+                <div style={{fontSize:'12px',color:'#888',lineHeight:1.6}}>{sel.description}</div>
+              </div>}
+              <div style={{background:'rgba(255,255,255,0.03)',borderRadius:'4px',padding:'12px',marginBottom:'16px'}}>
+                <div style={{fontSize:'9px',color:CR,textTransform:'uppercase',letterSpacing:'1.5px',fontWeight:700,marginBottom:'8px'}}>Owner Contact</div>
+                <div style={{fontSize:'12px',color:WH,lineHeight:1.8}}><strong>{sel.contactName}</strong><br/>{sel.contactPhone} · {sel.contactEmail}</div>
+              </div>
+              <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
+                {getStatus(sel).l!=='SOLD'&&<button style={{...s.btn,padding:'8px 16px',fontSize:'12px'}} onClick={()=>updateStatus(sel.id,'sold')}>✓ Mark Sold</button>}
+                {getStatus(sel).l==='SOLD'&&<button style={{padding:'8px 16px',background:'transparent',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'6px',color:WH,fontSize:'12px',cursor:'pointer',fontFamily:"'Montserrat',sans-serif"}} onClick={()=>updateStatus(sel.id,'active')}>↩ Reactivate</button>}
+                <button style={{padding:'8px 16px',background:'rgba(192,57,43,0.2)',border:'1px solid rgba(192,57,43,0.3)',borderRadius:'6px',color:'#c0392b',fontSize:'12px',cursor:'pointer',fontFamily:"'Montserrat',sans-serif"}} onClick={()=>setConfirm(sel.id)}>Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {confirm&&(
+        <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.8)',zIndex:3000,display:'flex',alignItems:'center',justifyContent:'center'}} onClick={()=>setConfirm(null)}>
+          <div onClick={e=>e.stopPropagation()} style={{background:'#141118',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'12px',padding:'32px',maxWidth:'360px',width:'100%',textAlign:'center'}}>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'28px',color:WH,letterSpacing:'1px',marginBottom:'8px'}}>CONFIRM DELETE</div>
+            <p style={{color:'#666',fontSize:'13px',marginBottom:'22px',lineHeight:1.6}}>This permanently removes this registration.</p>
+            <div style={{display:'flex',gap:'10px',justifyContent:'center'}}>
+              <button style={{padding:'10px 24px',background:'transparent',border:'1px solid rgba(255,255,255,0.2)',borderRadius:'6px',color:WH,cursor:'pointer',fontFamily:"'Montserrat',sans-serif"}} onClick={()=>setConfirm(null)}>Cancel</button>
+              <button style={{padding:'10px 24px',background:'#c0392b',border:'none',borderRadius:'6px',color:WH,cursor:'pointer',fontFamily:"'Montserrat',sans-serif",fontWeight:700}} onClick={()=>deleteVehicle(confirm)}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// REPORTS
+function ReportsPage({vehicles}) {
+  const weeks=[...new Set(vehicles.map(v=>v.weekNumber))].sort((a,b)=>a-b);
+  const types=[...new Set(vehicles.map(v=>v.vehicleType))].sort();
+  const weekSummary=weeks.map(w=>{const wv=vehicles.filter(v=>v.weekNumber===w);const sg=wv.filter(v=>v.registrationType==='single');const mu=wv.filter(v=>v.registrationType==='multi');return{week:w,total:wv.length,single:sg.length,multi:mu.length,fees:sg.length*25+mu.length*75,sold:wv.filter(v=>v.status==='sold').length,avgP:wv.length?Math.round(wv.reduce((s,v)=>s+(v.price||0),0)/wv.length):0};});
+  const typeSummary=types.map(t=>{const tv=vehicles.filter(v=>v.vehicleType===t);return{type:t,count:tv.length,pct:Math.round(tv.length/vehicles.length*100),active:tv.filter(v=>getStatus(v).l==='ACTIVE').length,avgP:tv.length?Math.round(tv.reduce((s,v)=>s+(v.price||0),0)/tv.length):0};}).sort((a,b)=>b.count-a.count);
+  const totalFees=weekSummary.reduce((s,w)=>s+w.fees,0);
+  const topListings=[...vehicles].sort((a,b)=>(b.price||0)-(a.price||0)).slice(0,8);
+  return (
+    <div style={{flex:1,overflowY:'auto',padding:'28px',background:'#0d1829'}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-end',marginBottom:'24px',flexWrap:'wrap',gap:'12px'}}>
+        <div>
+          <h1 style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'32px',color:WH,letterSpacing:'2px'}}>REPORTS & ANALYTICS</h1>
+          <p style={{color:'#555',fontSize:'12px',marginTop:'4px'}}>{vehicles.length} total registrations</p>
+        </div>
+        <button style={{...s.btn,padding:'9px 18px',fontSize:'12px'}} onClick={()=>csvExport(vehicles)}>⬇ Full Export</button>
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(160px,1fr))',gap:'12px',marginBottom:'24px'}}>
+        {[{l:'Total Fees',v:'$'+totalFees.toLocaleString(),c:'rgba(201,165,87,0.5)'},{l:'Registrations',v:vehicles.length,c:'rgba(255,255,255,0.2)'},{l:'Sold',v:vehicles.filter(v=>v.status==='sold').length,c:'rgba(45,138,78,0.5)'},{l:'Active Value',v:'$'+Math.round(vehicles.filter(v=>getStatus(v).l==='ACTIVE').reduce((s,v)=>s+(v.price||0),0)/1000)+'K',c:CR}].map(({l,v,c})=>(
+          <div key={l} style={{...s.statCard,borderLeft:`3px solid ${c}`}}>
+            <div style={{fontSize:'9px',color:'#555',fontWeight:600,textTransform:'uppercase',letterSpacing:'1px',marginBottom:'6px'}}>{l}</div>
+            <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'30px',color:WH,letterSpacing:'1px',lineHeight:1}}>{v}</div>
+          </div>
+        ))}
+      </div>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'16px',marginBottom:'16px'}}>
+        <div style={s.glassCard}>
+          <div style={{fontSize:'11px',color:'#888',fontWeight:600,marginBottom:'12px'}}>WEEKLY BREAKDOWN</div>
+          <table style={{width:'100%',borderCollapse:'collapse',fontSize:'11px'}}>
+            <thead><tr style={{borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
+              {['Week','Total','Single','90-Day','Sold','Fees'].map(h=><th key={h} style={{padding:'6px 7px',textAlign:'left',fontSize:'9px',color:'#555',fontWeight:700,textTransform:'uppercase'}}>{h}</th>)}
+            </tr></thead>
+            <tbody>
+              {weekSummary.map(w=><tr key={w.week} style={{borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
+                <td style={{padding:'8px 7px',fontWeight:700,color:WH}}>Wk {w.week}</td>
+                <td style={{padding:'8px 7px',color:'#888'}}>{w.total}</td>
+                <td style={{padding:'8px 7px',color:CR}}>{w.single}</td>
+                <td style={{padding:'8px 7px',color:'#c9a557'}}>{w.multi}</td>
+                <td style={{padding:'8px 7px',color:'#2d8a4e'}}>{w.sold}</td>
+                <td style={{padding:'8px 7px',color:'#c9a557',fontWeight:600}}>${w.fees}</td>
+              </tr>)}
+              <tr style={{borderTop:'1px solid rgba(255,255,255,0.1)',fontWeight:700}}>
+                <td style={{padding:'8px 7px',color:WH}}>TOTAL</td>
+                <td style={{padding:'8px 7px',color:WH}}>{vehicles.length}</td>
+                <td style={{padding:'8px 7px',color:CR}}>{vehicles.filter(v=>v.registrationType==='single').length}</td>
+                <td style={{padding:'8px 7px',color:'#c9a557'}}>{vehicles.filter(v=>v.registrationType==='multi').length}</td>
+                <td style={{padding:'8px 7px',color:'#2d8a4e'}}>{vehicles.filter(v=>v.status==='sold').length}</td>
+                <td style={{padding:'8px 7px',color:'#2d8a4e',fontWeight:700}}>${totalFees}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div style={s.glassCard}>
+          <div style={{fontSize:'11px',color:'#888',fontWeight:600,marginBottom:'12px'}}>BY VEHICLE TYPE</div>
+          <table style={{width:'100%',borderCollapse:'collapse',fontSize:'11px'}}>
+            <thead><tr style={{borderBottom:'1px solid rgba(255,255,255,0.08)'}}>
+              {['Type','Count','%','Active','Avg $'].map(h=><th key={h} style={{padding:'6px 7px',textAlign:'left',fontSize:'9px',color:'#555',fontWeight:700,textTransform:'uppercase'}}>{h}</th>)}
+            </tr></thead>
+            <tbody>
+              {typeSummary.map(t=><tr key={t.type} style={{borderBottom:'1px solid rgba(255,255,255,0.04)'}}>
+                <td style={{padding:'8px 7px',fontWeight:600,color:WH,fontSize:'12px'}}>{t.type}</td>
+                <td style={{padding:'8px 7px',color:'#888'}}>{t.count}</td>
+                <td style={{padding:'8px 7px'}}><div style={{display:'flex',alignItems:'center',gap:'6px'}}><div style={{height:'4px',width:t.pct+'%',maxWidth:'50px',background:CR,borderRadius:'2px'}}/><span style={{color:'#555',fontSize:'10px'}}>{t.pct}%</span></div></td>
+                <td style={{padding:'8px 7px',color:'#2d8a4e'}}>{t.active}</td>
+                <td style={{padding:'8px 7px',color:'#555'}}>${t.avgP.toLocaleString()}</td>
+              </tr>)}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div style={s.glassCard}>
+        <div style={{fontSize:'11px',color:'#888',fontWeight:600,marginBottom:'12px'}}>TOP VALUE LISTINGS</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:'8px'}}>
+          {topListings.map(v=>{const st=getStatus(v);return(
+            <div key={v.id} style={{border:'1px solid rgba(255,255,255,0.06)',borderRadius:'6px',padding:'12px',display:'flex',justifyContent:'space-between',alignItems:'center',background:'rgba(255,255,255,0.02)'}}>
+              <div>
+                <div style={{fontSize:'12px',fontWeight:600,color:WH}}>{v.year} {v.make} {v.model}</div>
+                <div style={{fontSize:'10px',color:'#555',marginTop:'2px'}}>{v.contactName} · Wk {v.weekNumber}</div>
+              </div>
+              <div style={{textAlign:'right'}}>
+                <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'18px',color:CR,letterSpacing:'1px'}}>{fmt$(v.price)}</div>
+                <span style={{background:st.c+'22',border:`1px solid ${st.c}44`,borderRadius:'3px',padding:'2px 6px',fontSize:'9px',fontWeight:700,color:st.c}}>{st.l}</span>
+              </div>
+            </div>
+          );})}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// LOGIN MODAL
+function LoginModal({onClose,onLogin}) {
+  const [u,setU]=useState('');const [p,setP]=useState('');const [err,setErr]=useState('');
+  const submit=e=>{e.preventDefault();if(USERS[u]===p){onLogin({user:u});}else setErr('Invalid credentials.');};
+  return (
+    <div style={{position:'fixed',inset:0,background:'rgba(0,0,0,0.7)',zIndex:9000,display:'flex',alignItems:'center',justifyContent:'center',backdropFilter:'blur(4px)'}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{background:'#141118',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'14px',padding:'40px',width:'400px',maxWidth:'92vw',boxShadow:'0 24px 80px rgba(0,0,0,0.6)'}}>
+        <div style={{textAlign:'center',marginBottom:'28px'}}>
+          <div style={{fontFamily:"'Bebas Neue',sans-serif",lineHeight:1.1}}>
+            <span style={{display:'block',fontSize:'18px',color:CR,letterSpacing:'3px'}}>SAVANNAH</span>
+            <span style={{display:'block',fontSize:'16px',color:WH,letterSpacing:'3px'}}>VEHICLE EXCHANGE</span>
+          </div>
+          <div style={{fontFamily:"'Bebas Neue',sans-serif",fontSize:'28px',color:WH,letterSpacing:'2px',marginTop:'12px'}}>STAFF LOGIN</div>
+        </div>
+        <form onSubmit={submit}>
+          {[{l:'Username',v:u,set:setU,t:'text'},{l:'Password',v:p,set:setP,t:'password'}].map(({l,v,set,t})=>(
+            <div key={l} style={{marginBottom:'16px'}}>
+              <label style={{...s.label,color:'#888'}}>{l}</label>
+              <input type={t} value={v} onChange={e=>set(e.target.value)} required style={{width:'100%',padding:'12px 14px',background:'rgba(255,255,255,0.05)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:'6px',fontSize:'14px',color:WH,outline:'none',fontFamily:"'Montserrat',sans-serif"}}/>
+            </div>
+          ))}
+          {err&&<div style={{background:'rgba(192,57,43,0.1)',border:'1px solid rgba(192,57,43,0.3)',borderRadius:'6px',padding:'10px',color:'#f08080',fontSize:'12px',marginBottom:'14px'}}>{err}</div>}
+          <button type="submit" style={{...s.btn,width:'100%',padding:'14px',fontSize:'14px',marginBottom:'10px'}}>Sign In →</button>
+          <button type="button" onClick={onClose} style={{width:'100%',padding:'11px',background:'transparent',color:'#555',border:'1px solid rgba(255,255,255,0.08)',borderRadius:'6px',fontSize:'13px',cursor:'pointer',fontFamily:"'Montserrat',sans-serif"}}>Cancel</button>
+        </form>
+        <div style={{marginTop:'20px',padding:'14px',background:'rgba(157,34,53,0.05)',borderRadius:'8px',border:'1px solid rgba(157,34,53,0.15)'}}>
+          <div style={{fontSize:'9px',color:'#555',textTransform:'uppercase',letterSpacing:'1px',marginBottom:'6px'}}>Demo Credentials</div>
+          <div style={{fontSize:'11px',color:CR,fontFamily:'monospace',lineHeight:1.9}}>admin / sve2026<br/>manager / autoshow2026<br/>supervisor / registration2026</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// MAIN APP
+const ADMIN_VIEWS = ['dashboard','manifest','reports'];
+
+function App() {
+  const [view,setView] = useState('home');
+  const [vehicles,setVehicles] = useState(SEED);
+  const [auth,setAuth] = useState(null);
+  const [showLogin,setShowLogin] = useState(false);
+
+  const nav = v => {
+    if(ADMIN_VIEWS.includes(v)&&!auth){setShowLogin(true);return;}
+    setView(v);setShowLogin(false);
+  };
+  const handleLogin = user => {setAuth(user);setShowLogin(false);setView('dashboard');};
+  const handleLogout = () => {setAuth(null);setView('home');};
+  const isAdmin = auth && ADMIN_VIEWS.includes(view);
+
+  return (
+    <div style={{minHeight:'100vh',background:GR}}>
+      <Header view={view} nav={nav} auth={auth} onLogin={()=>setShowLogin(true)} onLogout={handleLogout}/>
+      {isAdmin ? (
+        <div style={{display:'flex',height:'calc(100vh - 60px)',overflow:'hidden'}}>
+          <AdminSidebar view={view} nav={nav} auth={auth} onLogout={handleLogout}/>
+          {view==='dashboard'&&<DashboardPage vehicles={vehicles}/>}
+          {view==='manifest'&&<ManifestPage vehicles={vehicles} setVehicles={setVehicles}/>}
+          {view==='reports'&&<ReportsPage vehicles={vehicles}/>}
+        </div>
+      ):(
+        <div key={view}>
+          {view==='home'&&<HomePage nav={nav} vehicles={vehicles}/>}
+          {view==='register'&&<RegisterPage setVehicles={setVehicles} nav={nav}/>}
+          {view==='how-it-works'&&<HowItWorksPage/>}
+          {view==='location'&&<LocationPage/>}
+          {view==='faqs'&&<FAQsPage/>}
+          {view==='contact'&&<ContactPage/>}
+        </div>
+      )}
+      {showLogin&&<LoginModal onClose={()=>setShowLogin(false)} onLogin={handleLogin}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+
+</script>
+</body>
+</html>
+```
+<function_calls>
+<invoke name="present_files">
+<parameter name="filepaths">["/mnt/user-data/outputs/SVE_Platform.html"]

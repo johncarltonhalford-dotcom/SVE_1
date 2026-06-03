@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SVE Registry — Reserve Your Weekend</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --crimson:#9d2235;
+    --crimson-deep:#7a1a2a;
+    --crimson-soft:rgba(157,34,53,0.08);
+    --navy:#1a2b4a;
+    --navy-deep:#0d1829;
+    --gold:#c9a557;
+    --cream:#f6f1e8;
+    --cream-soft:#fbf7f0;
+    --paper:#ffffff;
+    --ink:#181715;
+    --body:#5a6478;
+    --muted:#8b8f9a;
+    --hairline:#e8e1d4;
+    --hairline-soft:#efe8da;
+    --success:#2d8a4e;
+    --serif:'DM Serif Display',Georgia,serif;
+    --display:'Bebas Neue',sans-serif;
+    --body-font:'Manrope',-apple-system,BlinkMacSystemFont,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  html,body{font-family:var(--body-font);background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+  ::selection{background:rgba(157,34,53,0.18);color:var(--navy)}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:rgba(157,34,53,0.25);border-radius:5px}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(157,34,53,0.5)}
+  input,select,textarea,button{font-family:inherit;color:inherit;font-size:14px}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--crimson)!important;box-shadow:0 0 0 3px rgba(157,34,53,0.12)!important}
+  button{cursor:pointer;border:none;background:none}
+  select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'><path d='M1 1l5 5 5-5' fill='none' stroke='%231a2b4a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 14px center;background-size:10px;padding-right:36px}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes fade{from{opacity:0}to{opacity:1}}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.04);opacity:.85}}
+  @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+  .rise{animation:rise .35s cubic-bezier(.22,1,.36,1) both}
+  .fade{animation:fade .25s ease-out both}
+  .grain{background-image:radial-gradient(circle at 25% 25%,rgba(157,34,53,.06) 1px,transparent 1px),radial-gradient(circle at 75% 75%,rgba(26,43,74,.04) 1px,transparent 1px);background-size:24px 24px,32px 32px}
+  @media print{body{background:#fff}.no-print{display:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="registry-app.jsx"></script>
+</body>
+</html>
